@@ -9,6 +9,10 @@ namespace Converter
 {
     internal class Program
     {
+        private const string DirectorTableName = "Director";
+        private const string GenreTableName = "Genre";
+        private const string ActorTableName = "Actor";
+
         static void Main(string[] args)
         {
             try
@@ -20,7 +24,15 @@ namespace Converter
             {
                 Console.WriteLine(string.Format("Could not find {0}", ex.FileName));
             }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.ReadKey();
+            Console.WriteLine("Nice");
         }
+
         private static IList<Movie> ReadMoviesFrom(string fileName)
         {
             var jsonSerializerSettings = new JsonSerializerSettings();
@@ -40,7 +52,14 @@ namespace Converter
 
         private static void WriteMoviesTo(IList<Movie> movies, string databaseFileName)
         {
-            SQLiteConnection.CreateFile(databaseFileName);
+            try
+            {
+                SQLiteConnection.CreateFile(databaseFileName);
+            }
+            catch (IOException)
+            {
+                throw new IOException($"{databaseFileName} already in use");
+            }
 
             using (var connection = new SQLiteConnection($"Data Source={databaseFileName};"))
             {
@@ -94,9 +113,25 @@ namespace Converter
 
                         foreach (var director in movies[index].Info.Directors)
                         {
-                            if (!DirectorExists(director, connection))
+                            if (!EntryExistsInTable(director, DirectorTableName, connection))
                             {
-                                Commands.InsertDirectorCommand(director, connection).ExecuteNonQuery();
+                                Commands.InsertEntryWithNameInTableCommand(director, DirectorTableName, connection).ExecuteNonQuery();
+                            }
+                        }
+
+                        foreach (var genre in movies[index].Info.Genres)
+                        {
+                            if (!EntryExistsInTable(genre, GenreTableName, connection))
+                            {
+                                Commands.InsertEntryWithNameInTableCommand(genre, GenreTableName, connection).ExecuteNonQuery();
+                            }
+                        }
+
+                        foreach (var actor in movies[index].Info.Actors)
+                        {
+                            if (!EntryExistsInTable(actor, ActorTableName, connection))
+                            {
+                                Commands.InsertEntryWithNameInTableCommand(actor, ActorTableName, connection).ExecuteNonQuery();
                             }
                         }
 
@@ -106,9 +141,9 @@ namespace Converter
             }
         }
 
-        private static bool DirectorExists(string directorName, SQLiteConnection connection)
+        private static bool EntryExistsInTable(string entry, string tableName, SQLiteConnection connection)
         {
-            using (var directorExistsCommand = Commands.DirectorExistsCommand(directorName, connection))
+            using (var directorExistsCommand = Commands.EntryWithNameExistsInTableCommand(entry, tableName, connection))
             {
                 return directorExistsCommand.ExecuteReader().Read();
             }

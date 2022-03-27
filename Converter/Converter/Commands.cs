@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
+using System.Linq;
 
 namespace Converter
 {
@@ -42,23 +43,35 @@ namespace Converter
             return command;
         }
 
-        internal static SQLiteCommand InsertDirectorCommand(string directorName, SQLiteConnection connection)
+        internal static SQLiteCommand InsertEntryWithNameInTableCommand(string entry, string table, SQLiteConnection connection)
         {
-            string commandString = $@"INSERT INTO Director (Name) VALUES (@Name)";
+            CheckForWhiteSpaces(table);
+
+            string commandString = $@"INSERT INTO {table} (Name) VALUES (@Name)";
             var command = new SQLiteCommand(commandString, connection);
 
-            command.Parameters.Add(new SQLiteParameter("@Name", directorName));
+            command.Parameters.Add(new SQLiteParameter("@Name", entry));
 
             return command;
         }
 
-        internal static SQLiteCommand DirectorExistsCommand(string directorName, SQLiteConnection connection)
+        internal static SQLiteCommand EntryWithNameExistsInTableCommand(string entry, string table, SQLiteConnection connection)
         {
-            var commandString = $@"SELECT Id FROM Director WHERE Name = @Name";
+            CheckForWhiteSpaces(table);
+
+            var commandString = $@"SELECT Id FROM {table} WHERE Name = @Name";
             var command = new SQLiteCommand(commandString, connection);
-            command.Parameters.Add(new SQLiteParameter("@Name", directorName));
+            command.Parameters.Add(new SQLiteParameter("@Name", entry));
 
             return command;
+        }
+
+        private static void CheckForWhiteSpaces(string table)
+        {
+            if (table.Any(x => Char.IsWhiteSpace(x)))
+            {
+                throw new Exception("Whitespace not allowed in order to avoid SQL Injection");
+            }
         }
     }
 }
