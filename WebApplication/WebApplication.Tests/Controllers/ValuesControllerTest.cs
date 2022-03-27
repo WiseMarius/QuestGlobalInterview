@@ -12,7 +12,7 @@ namespace WebApplication.Tests.Controllers
         public void Get()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            MoviesController controller = new MoviesController();
 
             // Act
             IEnumerable<string> result = controller.Get();
@@ -28,49 +28,13 @@ namespace WebApplication.Tests.Controllers
         public void GetById()
         {
             // Arrange
-            ValuesController controller = new ValuesController();
+            MoviesController controller = new MoviesController();
 
             // Act
             string result = controller.Get(5);
 
             // Assert
             Assert.AreEqual("value", result);
-        }
-
-        [TestMethod]
-        public void Post()
-        {
-            // Arrange
-            ValuesController controller = new ValuesController();
-
-            // Act
-            controller.Post("value");
-
-            // Assert
-        }
-
-        [TestMethod]
-        public void Put()
-        {
-            // Arrange
-            ValuesController controller = new ValuesController();
-
-            // Act
-            controller.Put(5, "value");
-
-            // Assert
-        }
-
-        [TestMethod]
-        public void Delete()
-        {
-            // Arrange
-            ValuesController controller = new ValuesController();
-
-            // Act
-            controller.Delete(5);
-
-            // Assert
         }
     }
 }

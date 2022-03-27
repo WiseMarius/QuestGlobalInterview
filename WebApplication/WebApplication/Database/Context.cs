@@ -8,14 +8,14 @@ namespace WebApplication.Database
     public class Context : DbContext
     {
         public Context() : base(new SQLiteConnection()
-                            {
-                                ConnectionString = new SQLiteConnectionStringBuilder()
-                                {
-                                    // IMPORTANT! moviedata.sqlite needs to be placed here C:\Program Files\IIS Express 
-                                    DataSource = "moviedata.sqlite",
-                                    ForeignKeys = true,
-                                }.ConnectionString
-                            }, true)
+        {
+            ConnectionString = new SQLiteConnectionStringBuilder()
+            {
+                // IMPORTANT! moviedata.sqlite needs to be placed here C:\Program Files\IIS Express 
+                DataSource = "moviedata.sqlite",
+                ForeignKeys = true,
+            }.ConnectionString
+        }, true)
         {
 
         }
@@ -26,6 +26,13 @@ namespace WebApplication.Database
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Director> Director { get; set;  }
+        public DbSet<Actor> Actors{ get; set; }
+        public DbSet<Director> Directors { get; set; }
+        public DbSet<Genre> Genres { get; set; }
+        public DbSet<Movie> Movies { get; set; }
+        public DbSet<MovieActor> MovieActors { get; set; }
+        public DbSet<MovieDirector> MovieDirectors { get; set; }
+        public DbSet<MovieGenre> MovieGenres { get; set; }
     }
+
 }
