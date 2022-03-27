@@ -6,7 +6,7 @@ namespace Converter
     internal class Info
     {
         public IList<string> Directors { get; set; }
-        public DateTime ReleaseDate;
+        public DateTime ReleaseDate { get; set; }
         public float Rating { get; set; }
         public IList<string> Genres { get; set; }
     }
