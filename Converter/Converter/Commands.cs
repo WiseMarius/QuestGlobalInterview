@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Linq;
 
@@ -55,7 +54,7 @@ namespace Converter
             return command;
         }
 
-        internal static SQLiteCommand EntryWithNameExistsInTableCommand(string entry, string table, SQLiteConnection connection)
+        internal static SQLiteCommand GetIdByNameInTableCommand(string entry, string table, SQLiteConnection connection)
         {
             CheckForWhiteSpaces(table);
 
@@ -66,7 +65,30 @@ namespace Converter
             return command;
         }
 
-        private static void CheckForWhiteSpaces(string table)
+        internal static SQLiteCommand GetIdByMovieTitleCommand(string title, SQLiteConnection connection)
+        {
+            var commandString = $@"SELECT Id FROM Movie WHERE Title = @Title";
+            var command = new SQLiteCommand(commandString, connection);
+            command.Parameters.Add(new SQLiteParameter("@Title", title));
+
+            return command;
+        }
+
+        internal static SQLiteCommand InsertRelationBetweenMovieAnd(string relationTableName, string relationTableIdName, int movieId, int otherId, SQLiteConnection connection)
+        {
+            CheckForWhiteSpaces(relationTableName);
+            CheckForWhiteSpaces(relationTableIdName);
+
+            string commandString = $@"INSERT INTO {relationTableName} (MovieId, {relationTableIdName}) VALUES (@MovieId, @OtherId)";
+            var command = new SQLiteCommand(commandString, connection);
+
+            command.Parameters.Add(new SQLiteParameter("@MovieId", movieId.ToString()));
+            command.Parameters.Add(new SQLiteParameter("@OtherId", otherId.ToString()));
+
+            return command;
+        }
+
+        internal static void CheckForWhiteSpaces(string table)
         {
             if (table.Any(x => Char.IsWhiteSpace(x)))
             {

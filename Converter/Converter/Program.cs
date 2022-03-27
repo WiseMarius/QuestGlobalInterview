@@ -12,13 +12,16 @@ namespace Converter
         private const string DirectorTableName = "Director";
         private const string GenreTableName = "Genre";
         private const string ActorTableName = "Actor";
+        private const string MovieDirectorTableName = "MovieDirector";
+        private const string MovieGenreTableName = "MovieGenre";
+        private const string MovieActorTableName = "MovieActor";
 
         static void Main(string[] args)
         {
             try
             {
                 var movies = ReadMoviesFrom("moviedata.json");
-                WriteMoviesTo(movies.Take(100).ToList(), "moviedata.sqlite");
+                WriteMoviesTo(movies, "moviedata.sqlite");
             }
             catch (FileNotFoundException ex)
             {
@@ -111,29 +114,13 @@ namespace Converter
                             insertCommand.ExecuteNonQuery();
                         }
 
-                        foreach (var director in movies[index].Info.Directors)
-                        {
-                            if (!EntryExistsInTable(director, DirectorTableName, connection))
-                            {
-                                Commands.InsertEntryWithNameInTableCommand(director, DirectorTableName, connection).ExecuteNonQuery();
-                            }
-                        }
+                        AddDirectorIfMissing(movies[index], connection);
+                        AddGenreIfMissing(movies[index], connection);
+                        AddActorIfMissing(movies[index], connection);
 
-                        foreach (var genre in movies[index].Info.Genres)
-                        {
-                            if (!EntryExistsInTable(genre, GenreTableName, connection))
-                            {
-                                Commands.InsertEntryWithNameInTableCommand(genre, GenreTableName, connection).ExecuteNonQuery();
-                            }
-                        }
-
-                        foreach (var actor in movies[index].Info.Actors)
-                        {
-                            if (!EntryExistsInTable(actor, ActorTableName, connection))
-                            {
-                                Commands.InsertEntryWithNameInTableCommand(actor, ActorTableName, connection).ExecuteNonQuery();
-                            }
-                        }
+                        CreateRelationBetweenMovieAndDirectors(movies[index], connection);
+                        CreateRelationBetweenMovieAndGenres(movies[index], connection);
+                        CreateRelationBetweenMovieAndActors(movies[index], connection);
 
                         progress.Report((double)index / movies.Count);
                     }
@@ -141,12 +128,111 @@ namespace Converter
             }
         }
 
+        private static void AddActorIfMissing(Movie movie, SQLiteConnection connection)
+        {
+            foreach (var actor in movie.Info.Actors)
+            {
+                if (!EntryExistsInTable(actor, ActorTableName, connection))
+                {
+                    Commands.InsertEntryWithNameInTableCommand(actor, ActorTableName, connection).ExecuteNonQuery();
+                }
+            }
+        }
+
+        private static void AddGenreIfMissing(Movie movie, SQLiteConnection connection)
+        {
+            foreach (var genre in movie.Info.Genres)
+            {
+                if (!EntryExistsInTable(genre, GenreTableName, connection))
+                {
+                    Commands.InsertEntryWithNameInTableCommand(genre, GenreTableName, connection).ExecuteNonQuery();
+                }
+            }
+        }
+
+        private static void AddDirectorIfMissing(Movie movie, SQLiteConnection connection)
+        {
+            foreach (var director in movie.Info.Directors)
+            {
+                if (!EntryExistsInTable(director, DirectorTableName, connection))
+                {
+                    Commands.InsertEntryWithNameInTableCommand(director, DirectorTableName, connection).ExecuteNonQuery();
+                }
+            }
+        }
+
         private static bool EntryExistsInTable(string entry, string tableName, SQLiteConnection connection)
         {
-            using (var directorExistsCommand = Commands.EntryWithNameExistsInTableCommand(entry, tableName, connection))
+            using (var entryExistsCommand = Commands.GetIdByNameInTableCommand(entry, tableName, connection))
             {
-                return directorExistsCommand.ExecuteReader().Read();
+                return entryExistsCommand.ExecuteReader().Read();
             }
+        }
+
+        private static void CreateRelationBetweenMovieAndDirectors(Movie movie, SQLiteConnection connection)
+        {
+            var movieId = GetMovieId(movie.Title, connection);
+
+            foreach (var director in movie.Info.Directors)
+            {
+                var directorId = GetEntryIdFromTable(director, DirectorTableName, connection);
+
+                Commands.InsertRelationBetweenMovieAnd(MovieDirectorTableName, "DirectorId", movieId, directorId, connection).ExecuteNonQuery();
+            }
+        }
+
+        private static void CreateRelationBetweenMovieAndGenres(Movie movie, SQLiteConnection connection)
+        {
+            var movieId = GetMovieId(movie.Title, connection);
+
+            foreach (var genre in movie.Info.Genres)
+            {
+                var genreId = GetEntryIdFromTable(genre, GenreTableName, connection);
+
+                Commands.InsertRelationBetweenMovieAnd(MovieGenreTableName, "GenreId", movieId, genreId, connection).ExecuteNonQuery();
+            }
+        }
+
+        private static void CreateRelationBetweenMovieAndActors(Movie movie, SQLiteConnection connection)
+        {
+            var movieId = GetMovieId(movie.Title, connection);
+
+            foreach (var actor in movie.Info.Actors)
+            {
+                var actorId = GetEntryIdFromTable(actor, ActorTableName, connection);
+
+                Commands.InsertRelationBetweenMovieAnd(MovieActorTableName, "ActorId", movieId, actorId, connection).ExecuteNonQuery();
+            }
+        }
+
+        private static int GetEntryIdFromTable(string entry, string table, SQLiteConnection connection)
+        {
+            int id;
+
+            using (var entryExistsCommand = Commands.GetIdByNameInTableCommand(entry, table, connection))
+            using (var reader = entryExistsCommand.ExecuteReader())
+            {
+                reader.Read();
+
+                id = reader.GetInt32(0);
+            }
+
+            return id;
+        }
+
+        private static int GetMovieId(string entry, SQLiteConnection connection)
+        {
+            int id;
+
+            using (var entryExistsCommand = Commands.GetIdByMovieTitleCommand(entry, connection))
+            using (var reader = entryExistsCommand.ExecuteReader())
+            {
+                reader.Read();
+
+                id = reader.GetInt32(0);
+            }
+
+            return id;
         }
     }
 }
