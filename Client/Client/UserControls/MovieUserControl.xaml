@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Client.UserControls"
              mc:Ignorable="d" x:Name="MovieUC"
-             d:DesignHeight="300" d:DesignWidth="200">
+             d:DesignHeight="60" d:DesignWidth="30">
     
     <Grid>
         <Grid.RowDefinitions>
