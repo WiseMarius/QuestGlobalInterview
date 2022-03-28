@@ -4,9 +4,25 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Client"
+        xmlns:uc="clr-namespace:Client.UserControls"
         mc:Ignorable="d"
         Title="Movies" Height="450" Width="800">
     <Grid>
+        <Grid Margin="7">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="5*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="1*"></RowDefinition>
+                <RowDefinition Height="10*"></RowDefinition>
+            </Grid.RowDefinitions>
 
+            <Label Grid.Row="0" Grid.Column="0" Content="Select a year"/>
+
+            <ListBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Years}"/>
+
+            <uc:MovieUserControl Grid.Row="1" Grid.Column="1" Movie="{Binding Movie}"/>
+        </Grid>
     </Grid>
 </Window>

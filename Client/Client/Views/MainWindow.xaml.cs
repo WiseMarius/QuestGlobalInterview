@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using Client.ViewModels;
+using System.Windows;
 
 namespace Client
 {
@@ -7,9 +8,13 @@ namespace Client
     /// </summary>
     public partial class MainWindow : Window
     {
+        private readonly MainWindowsViewModel _viewModel = new MainWindowsViewModel();
+
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContext = _viewModel;
         }
     }
 }
