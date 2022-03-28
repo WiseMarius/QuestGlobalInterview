@@ -15,6 +15,7 @@
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="1*"></RowDefinition>
+                <RowDefinition Height="1*"></RowDefinition>
                 <RowDefinition Height="10*"></RowDefinition>
             </Grid.RowDefinitions>
 
@@ -22,9 +23,14 @@
 
             <Label Grid.Row="0" Grid.Column="1" Content="{Binding MoviesFromYear}" HorizontalAlignment="Center"/>
 
-            <ListBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}"/>
+            <ListBox Grid.Row="1" Grid.Column="0" Grid.RowSpan="2" ItemsSource="{Binding Years}" SelectedItem="{Binding SelectedYear}"/>
 
-            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+            <StackPanel Grid.Row="1" Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Label Content="Seach by name"/>
+                <TextBox Text="{Binding UpdateSourceTrigger=PropertyChanged, Path=SeachBoxValue, Mode=TwoWay}" Width="260"/>
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
                 <StackPanel.Resources>
                     <Style TargetType="{x:Type uc:MovieUserControl}">
                         <Setter Property="Margin" Value="15"/>

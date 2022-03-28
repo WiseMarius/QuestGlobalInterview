@@ -96,6 +96,28 @@ namespace Client.ViewModels
         }
         #endregion
 
+        #region SeachBoxValue
+        private string _seachBoxValue;
+        public string SeachBoxValue
+        {
+            get { return _seachBoxValue; }
+            set
+            {
+                if (_seachBoxValue != value)
+                {
+                    _seachBoxValue = value;
+
+                    NotifyPropertyChanged(nameof(SeachBoxValue));
+
+                    if (_seachBoxValue.Length > 2)
+                    {
+                        SearchMovieFromYearByName(SelectedYear, _seachBoxValue);
+                    }
+                }
+            }
+        }
+        #endregion
+
         #region SelectedYear
         private string _selectedYear;
         public string SelectedYear
@@ -134,6 +156,20 @@ namespace Client.ViewModels
 
             List<Movie> movies = JsonConvert.DeserializeObject<List<Movie>>(result);
 
+            AssignResultedMovies(movies);
+        }
+
+        private void SearchMovieFromYearByName(string selectedYear, string seachBoxValue)
+        {
+            var result = HttpHelper.Get("http://localhost:2223/api/Movies", new { year = selectedYear.ToString(), name = seachBoxValue });
+
+            List<Movie> movies = JsonConvert.DeserializeObject<List<Movie>>(result);
+
+            AssignResultedMovies(movies);
+        }
+
+        private void AssignResultedMovies(List<Movie> movies)
+        {
             Movie1 = null;
             Movie2 = null;
             Movie3 = null;
@@ -141,19 +177,31 @@ namespace Client.ViewModels
 
             if (movies.Count > 0)
             {
+                ReplaceMissingImageForMovie(movies[0]);
                 Movie1 = movies[0];
             }
             if (movies.Count > 1)
             {
+                ReplaceMissingImageForMovie(movies[1]);
                 Movie2 = movies[1];
             }
             if (movies.Count > 2)
             {
+                ReplaceMissingImageForMovie(movies[2]);
                 Movie3 = movies[2];
             }
             if (movies.Count > 3)
             {
+                ReplaceMissingImageForMovie(movies[3]);
                 Movie4 = movies[3];
+            }
+        }
+
+        private void ReplaceMissingImageForMovie(Movie movie)
+        {
+            if (string.IsNullOrEmpty(movie.ImageURL))
+            {
+                movie.ImageURL = "https://media.istockphoto.com/photos/white-puzzle-with-one-missing-piece-picture-id90330304?k=6&m=90330304&s=612x612&w=0&h=oYaXUqIIIojFWmWBg3WapFZ1Xpw6-SVcLIxzb3fk9mo=";
             }
         }
 
